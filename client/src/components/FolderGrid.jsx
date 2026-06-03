@@ -12,12 +12,13 @@ const FolderCard = ({ folder, onEnter }) => {
   }, [folder._id]);
 
   const formatSize = (bytes) => {
-    if (bytes === null) return 'Loading...';
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    if (bytes === 0) return '0 KB';
+    const mb = 1024 * 1024;
+    if (bytes < mb) {
+      return (bytes / 1024).toFixed(2) + ' KB';
+    } else {
+      return (bytes / mb).toFixed(2) + ' MB';
+    }
   };
 
   return (
@@ -41,7 +42,11 @@ const FolderCard = ({ folder, onEnter }) => {
     >
       <div style={{ fontSize: '48px', marginBottom: '12px' }}>📁</div>
       <strong style={{ textAlign: 'center', wordBreak: 'break-word', marginBottom: '4px' }}>{folder.name}</strong>
-      <span style={{ fontSize: '13px', color: '#888' }}>{formatSize(size)}</span>
+      {size === null ? (
+        <div style={{ width: '50px', height: '16px', background: '#e0e0e0', borderRadius: '4px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+      ) : (
+        <span style={{ fontSize: '13px', color: '#888' }}>{formatSize(size)}</span>
+      )}
     </div>
   );
 };
@@ -51,6 +56,13 @@ const FolderGrid = ({ folders, onEnterFolder }) => {
 
   return (
     <div style={{ marginBottom: '32px' }}>
+      <style>{`
+        @keyframes pulse {
+          0% { opacity: 0.4; }
+          50% { opacity: 1; }
+          100% { opacity: 0.4; }
+        }
+      `}</style>
       <h3 style={{ marginBottom: '16px', color: '#333' }}>Folders</h3>
       <div style={{ 
         display: 'grid', 
