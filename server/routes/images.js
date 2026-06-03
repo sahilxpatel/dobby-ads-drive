@@ -1,40 +1,30 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
 const Folder = require('../models/Folder');
 const Image = require('../models/Image');
 const authMiddleware = require('../middleware/authMiddleware');
 
-// Ensure uploads directory exists
-const uploadDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Configure Multer
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname.replace(/\s+/g, '-'));
-  }
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
-    cb(null, true);
-  } else {
-    cb(new Error('Only image files are allowed!'), false);
-  }
-};
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'dobby_ads_drive',
+    allowed_formats: ['jpeg', 'png', 'jpg', 'webp', 'gif']
+  },
+});
 
 const upload = multer({ 
   storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-  fileFilter: fileFilter
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
 // Apply auth middleware to all routes
@@ -54,16 +44,17 @@ router.post('/upload', upload.single('image'), async (req, res) => {
       // Validate folder ownership
       const folder = await Folder.findOne({ _id: targetFolderId, owner: req.user.userId });
       if (!folder) {
-        // Cleanup the uploaded file
-        if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+        // Destroy uploaded file on Cloudinary since it's unauthorized
+        await cloudinary.uploader.destroy(req.file.filename);
         return res.status(404).json({ message: 'Target folder not found or unauthorized' });
       }
     }
 
     const newImage = new Image({
       name: name || req.file.originalname,
-      filename: req.file.filename,
-      size: req.file.size,
+      filename: req.file.filename, // Cloudinary public_id
+      url: req.file.path, // Cloudinary secure_url
+      size: req.file.size || req.file.bytes || 0,
       folder: targetFolderId,
       owner: req.user.userId
     });
@@ -71,8 +62,8 @@ router.post('/upload', upload.single('image'), async (req, res) => {
     await newImage.save();
     res.status(201).json(newImage);
   } catch (err) {
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
+    if (req.file && req.file.filename) {
+      await cloudinary.uploader.destroy(req.file.filename).catch(() => {});
     }
     console.error(err);
     res.status(500).json({ message: err.message || 'Server error' });
@@ -107,10 +98,17 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ message: 'Image not found' });
     }
 
-    // Delete file from disk
-    const filePath = path.join(uploadDir, image.filename);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    // Delete from Cloudinary using the stored public_id (filename)
+    if (image.filename && image.url) {
+      await cloudinary.uploader.destroy(image.filename);
+    } else {
+      // Legacy local file cleanup just in case
+      const fs = require('fs');
+      const path = require('path');
+      const filePath = path.join(__dirname, '../uploads', image.filename);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
     }
 
     await Image.deleteOne({ _id: image._id });

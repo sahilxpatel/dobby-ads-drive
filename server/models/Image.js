@@ -7,7 +7,11 @@ const ImageSchema = new mongoose.Schema({
   },
   filename: {
     type: String,
-    required: true, // Disk/cloud filename
+    required: true, // Disk/cloud filename (public_id for cloudinary)
+  },
+  url: {
+    type: String,
+    required: false, // Cloudinary URL
   },
   size: {
     type: Number,

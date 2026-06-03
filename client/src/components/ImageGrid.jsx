@@ -45,7 +45,7 @@ const ImageGrid = ({ images, onDelete }) => {
           }}>
             <div style={{ height: '180px', background: '#f5f5f5', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <img 
-                src={`http://localhost:5000/uploads/${img.filename}`} 
+                src={img.url || `http://localhost:5000/uploads/${img.filename}`} 
                 alt={img.name}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
               />
