@@ -10,16 +10,13 @@ import UploadImageModal from '../components/UploadImageModal';
 const DrivePage = () => {
   const { user, logout } = useAuth();
   
-  // State for Navigation
   const [currentFolder, setCurrentFolder] = useState(null);
   const [historyStack, setHistoryStack] = useState([]);
   
-  // State for Data
   const [folders, setFolders] = useState([]);
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // State for Modals
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
@@ -64,27 +61,37 @@ const DrivePage = () => {
     }
   };
 
-  const handleBack = () => {
-    if (historyStack.length === 0) {
-      setCurrentFolder(null);
-    } else {
-      const newStack = [...historyStack];
-      const prevFolder = newStack.pop();
-      setHistoryStack(newStack);
-      setCurrentFolder(prevFolder);
-    }
-  };
-
   return (
-    <div style={{ minHeight: '100vh', background: '#f0f2f5' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 32px', background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-        <h2 style={{ margin: 0, color: '#1677ff' }}>Drive <span style={{ color: '#333', fontSize: '18px' }}>/ {user?.username}</span></h2>
-        <button onClick={logout} style={{ padding: '8px 16px', background: '#fff', border: '1px solid #d9d9d9', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
-          Logout
-        </button>
+    <div style={{ minHeight: '100vh', background: '#f3f4f6', width: '100%' }}>
+      <header style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        height: '60px', 
+        padding: '0 24px', 
+        background: '#fff', 
+        borderBottom: '1px solid #e5e7eb' 
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h2 style={{ margin: 0, color: '#2563eb', fontSize: '20px', fontWeight: '600' }}>Drive</h2>
+          <span style={{ color: '#9ca3af', fontSize: '20px' }}>/</span>
+          <span style={{ color: '#6b7280', fontSize: '16px', fontWeight: '500' }}>{user?.username}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ 
+            width: '32px', height: '32px', borderRadius: '50%', background: '#e5e7eb', 
+            display: 'flex', alignItems: 'center', justifyContent: 'center', 
+            color: '#374151', fontWeight: 'bold', fontSize: '14px' 
+          }}>
+            {user?.username?.charAt(0).toUpperCase()}
+          </div>
+          <button onClick={logout} className="logout-btn">
+            Logout
+          </button>
+        </div>
       </header>
 
-      <main style={{ padding: '32px', maxWidth: '1400px', margin: '0 auto' }}>
+      <main style={{ padding: '24px', width: '100%', boxSizing: 'border-box' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
           <Breadcrumb 
             historyStack={historyStack} 
@@ -92,24 +99,40 @@ const DrivePage = () => {
             onNavigate={handleNavigateBreadcrumb} 
           />
           <div style={{ display: 'flex', gap: '12px' }}>
-            <button onClick={() => setIsFolderModalOpen(true)} style={actionButtonStyle('#fff', '#1677ff', '1px solid #1677ff')}>+ New Folder</button>
-            <button onClick={() => setIsUploadModalOpen(true)} style={actionButtonStyle('#1677ff', '#fff', 'none')}>+ Upload Image</button>
+            <button 
+              onClick={() => setIsFolderModalOpen(true)} 
+              style={{ background: '#fff', color: '#2563eb', border: '1px solid #2563eb', borderRadius: '8px', padding: '10px 20px', fontWeight: '500', cursor: 'pointer' }}
+            >
+              + New Folder
+            </button>
+            <button 
+              onClick={() => setIsUploadModalOpen(true)} 
+              style={{ background: '#2563eb', color: '#fff', border: 'none', borderRadius: '8px', padding: '10px 20px', fontWeight: '500', cursor: 'pointer' }}
+            >
+              + Upload Image
+            </button>
           </div>
         </div>
-
-        {currentFolder && (
-          <button onClick={handleBack} style={{ marginBottom: '24px', padding: '8px 16px', background: '#fff', border: '1px solid #d9d9d9', borderRadius: '4px', cursor: 'pointer' }}>
-            &larr; Back
-          </button>
-        )}
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>Loading contents...</div>
         ) : (
           <>
-            <FolderGrid folders={folders} onEnterFolder={handleEnterFolder} />
-            {folders.length > 0 && images.length > 0 && <hr style={{ margin: '32px 0', border: 'none', borderTop: '1px solid #e8e8e8' }} />}
-            <ImageGrid images={images} onDelete={fetchData} />
+            {folders.length === 0 && images.length === 0 ? (
+              <div style={{ 
+                marginTop: '80px', display: 'flex', flexDirection: 'column', 
+                alignItems: 'center', justifyContent: 'center' 
+              }}>
+                <div style={{ fontSize: '64px', marginBottom: '16px' }}>📁</div>
+                <h3 style={{ color: '#374151', fontSize: '18px', fontWeight: '600', margin: '0 0 8px 0' }}>This folder is empty</h3>
+                <p style={{ color: '#9ca3af', fontSize: '14px', margin: 0 }}>Create a new folder or upload an image to get started</p>
+              </div>
+            ) : (
+              <>
+                <FolderGrid folders={folders} onEnterFolder={handleEnterFolder} />
+                <ImageGrid images={images} onDelete={fetchData} />
+              </>
+            )}
           </>
         )}
       </main>
@@ -130,16 +153,5 @@ const DrivePage = () => {
     </div>
   );
 };
-
-const actionButtonStyle = (bg, color, border) => ({
-  padding: '10px 20px',
-  background: bg,
-  color: color,
-  border: border,
-  borderRadius: '6px',
-  cursor: 'pointer',
-  fontWeight: 'bold',
-  boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-});
 
 export default DrivePage;

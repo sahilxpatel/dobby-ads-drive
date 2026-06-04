@@ -40,41 +40,69 @@ const UploadImageModal = ({ isOpen, onClose, currentFolderId, onSuccess }) => {
     }
   };
 
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div style={modalOverlayStyle}>
-      <div style={modalContentStyle}>
-        <h2 style={{ marginTop: 0 }}>Upload Image</h2>
+    <div 
+      style={{
+        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', 
+        zIndex: 50
+      }}
+      onClick={handleOverlayClick}
+    >
+      <div style={{
+        position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+        background: '#fff', borderRadius: '12px', padding: '28px', width: '400px',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        boxSizing: 'border-box'
+      }}>
+        <h2 style={{ margin: '0 0 20px 0', fontSize: '20px', fontWeight: 'bold', color: '#111827' }}>Upload Image</h2>
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Name (optional)</label>
+            <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#4b5563', fontWeight: '500' }}>Name (optional)</label>
             <input 
               type="text" 
               value={name} 
               onChange={e => setName(e.target.value)} 
               placeholder="e.g. Vacation Photo"
-              style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc', boxSizing: 'border-box' }}
+              className="auth-input"
             />
           </div>
           <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Image File</label>
+            <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#4b5563', fontWeight: '500' }}>Image File</label>
             <input 
               type="file" 
               accept="image/*"
               onChange={e => setFile(e.target.files[0])} 
               required
-              style={{ width: '100%' }}
+              style={{ width: '100%', fontSize: '14px' }}
             />
           </div>
           
           {loading && (
-            <div style={{ marginBottom: '20px', background: '#f0f0f0', borderRadius: '4px', height: '8px', overflow: 'hidden' }}>
-              <div style={{ width: `${progress}%`, background: '#1677ff', height: '100%', transition: 'width 0.2s' }} />
+            <div style={{ marginBottom: '20px', background: '#f3f4f6', borderRadius: '8px', height: '8px', overflow: 'hidden' }}>
+              <div style={{ width: `${progress}%`, background: '#2563eb', height: '100%', transition: 'width 0.2s' }} />
             </div>
           )}
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-            <button type="button" onClick={onClose} disabled={loading} style={btnStyle('#fff', '#333', '1px solid #ccc')}>Cancel</button>
-            <button type="submit" disabled={loading || !file} style={btnStyle('#1677ff', '#fff', 'none')}>
+            <button 
+              type="button" 
+              onClick={onClose} 
+              disabled={loading} 
+              style={{ padding: '10px 16px', background: '#f3f4f6', color: '#4b5563', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '500' }}
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              disabled={loading || !file} 
+              style={{ padding: '10px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '500' }}
+            >
               {loading ? `Uploading (${progress}%)` : 'Upload'}
             </button>
           </div>
@@ -83,16 +111,5 @@ const UploadImageModal = ({ isOpen, onClose, currentFolderId, onSuccess }) => {
     </div>
   );
 };
-
-const modalOverlayStyle = {
-  position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-  background: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
-};
-const modalContentStyle = {
-  background: 'white', padding: '32px', borderRadius: '12px', minWidth: '350px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
-};
-const btnStyle = (bg, color, border) => ({
-  padding: '8px 16px', background: bg, color, border, borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold'
-});
 
 export default UploadImageModal;

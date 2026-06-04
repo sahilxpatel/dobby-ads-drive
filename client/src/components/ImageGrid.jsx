@@ -2,14 +2,13 @@ import React from 'react';
 import api from '../api/api';
 
 const ImageGrid = ({ images, onDelete }) => {
-  if (!images || images.length === 0) return <p style={{ color: '#888' }}>No images found in this folder.</p>;
+  if (!images || images.length === 0) return null;
 
   const formatSize = (bytes) => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    if (bytes === 0) return '0 KB';
+    const mb = 1024 * 1024;
+    if (bytes < mb) return (bytes / 1024).toFixed(2) + ' KB';
+    return (bytes / mb).toFixed(2) + ' MB';
   };
 
   const handleDelete = async (e, id) => {
@@ -27,47 +26,37 @@ const ImageGrid = ({ images, onDelete }) => {
 
   return (
     <div>
-      <h3 style={{ marginBottom: '16px', color: '#333' }}>Images</h3>
+      <h3 style={{ marginBottom: '16px', color: '#374151', fontSize: '16px', fontWeight: '600' }}>Images</h3>
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', 
-        gap: '20px' 
+        gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', 
+        gap: '16px' 
       }}>
         {images.map(img => (
-          <div key={img._id} style={{
-            border: '1px solid #e8e8e8',
-            borderRadius: '8px',
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-            background: '#fff',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
-          }}>
-            <div style={{ height: '180px', background: '#f5f5f5', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <div key={img._id} className="image-card">
+            <div style={{ height: '120px', width: '100%', background: '#f3f4f6' }}>
               <img 
                 src={img.url || `http://localhost:5000/uploads/${img.filename}`} 
                 alt={img.name}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
               />
             </div>
-            <div style={{ padding: '16px', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-              <strong style={{ wordBreak: 'break-word', marginBottom: '8px' }}>{img.name}</strong>
-              <span style={{ fontSize: '13px', color: '#888', marginBottom: '16px' }}>{formatSize(img.size)}</span>
-              <button 
-                onClick={(e) => handleDelete(e, img._id)}
-                style={{ 
-                  marginTop: 'auto', 
-                  background: '#ff4d4f', 
-                  color: 'white', 
-                  border: 'none', 
-                  padding: '8px', 
-                  cursor: 'pointer', 
-                  borderRadius: '4px',
-                  fontWeight: 'bold'
-                }}
-              >
-                Delete
-              </button>
+            <div style={{ padding: '12px', display: 'flex', flexDirection: 'column' }}>
+              <strong style={{ wordBreak: 'break-word', marginBottom: '4px', fontSize: '14px', color: '#111827' }}>
+                {img.name}
+              </strong>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', color: '#6b7280' }}>{formatSize(img.size)}</span>
+                <button 
+                  onClick={(e) => handleDelete(e, img._id)}
+                  style={{ 
+                    background: 'transparent', color: '#dc2626', border: 'none', 
+                    padding: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: '500' 
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         ))}

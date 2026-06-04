@@ -1,9 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from '../api/api';
 
 const CreateFolderModal = ({ isOpen, onClose, currentFolderId, onSuccess }) => {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -22,29 +30,58 @@ const CreateFolderModal = ({ isOpen, onClose, currentFolderId, onSuccess }) => {
       onClose();
     } catch (err) {
       console.error(err);
-      alert('Failed to create folder');
+      setError(err.response?.data?.message || 'Failed to create folder');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div style={modalOverlayStyle}>
-      <div style={modalContentStyle}>
-        <h2 style={{ marginTop: 0 }}>Create Folder</h2>
+    <div 
+      style={{
+        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', 
+        zIndex: 50
+      }}
+      onClick={handleOverlayClick}
+    >
+      <div style={{
+        position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+        background: '#fff', borderRadius: '12px', padding: '28px', width: '400px',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        boxSizing: 'border-box'
+      }}>
+        <h2 style={{ margin: '0 0 20px 0', fontSize: '20px', fontWeight: 'bold', color: '#111827' }}>Create New Folder</h2>
+        {error && <div style={{ background: '#ffebee', color: '#d32f2f', padding: '10px', borderRadius: '6px', marginBottom: '16px', fontSize: '14px', textAlign: 'center' }}>{error}</div>}
         <form onSubmit={handleSubmit}>
           <input 
+            ref={inputRef}
             type="text" 
             placeholder="Folder Name" 
             value={name} 
-            onChange={e => setName(e.target.value)} 
+            onChange={e => { setName(e.target.value); setError(''); }} 
             required
-            autoFocus
-            style={{ width: '100%', padding: '10px', marginBottom: '20px', borderRadius: '4px', border: '1px solid #ccc', boxSizing: 'border-box' }}
+            className="auth-input"
+            style={{ marginBottom: '24px' }}
           />
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-            <button type="button" onClick={onClose} style={btnStyle('#fff', '#333', '1px solid #ccc')}>Cancel</button>
-            <button type="submit" disabled={loading} style={btnStyle('#1677ff', '#fff', 'none')}>
+            <button 
+              type="button" 
+              onClick={onClose} 
+              style={{ padding: '10px 16px', background: '#f3f4f6', color: '#4b5563', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '500' }}
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              disabled={loading} 
+              style={{ padding: '10px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '500' }}
+            >
               {loading ? 'Creating...' : 'Create'}
             </button>
           </div>
@@ -53,16 +90,5 @@ const CreateFolderModal = ({ isOpen, onClose, currentFolderId, onSuccess }) => {
     </div>
   );
 };
-
-const modalOverlayStyle = {
-  position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-  background: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
-};
-const modalContentStyle = {
-  background: 'white', padding: '32px', borderRadius: '12px', minWidth: '350px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
-};
-const btnStyle = (bg, color, border) => ({
-  padding: '8px 16px', background: bg, color, border, borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold'
-});
 
 export default CreateFolderModal;
