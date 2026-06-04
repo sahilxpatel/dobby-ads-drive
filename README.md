@@ -16,6 +16,7 @@ Dobby Ads Drive is a full-stack MERN application that provides a drive-like expe
 - **Nested Folders**: Create folders inside folders, similar to Google Drive
 - **Folder Size**: Each folder displays total size including all nested content
 - **User Isolation**: Users can only see their own folders and images
+- **Continuous Integration**: Automated GitHub Actions pipeline for linting and building the frontend.
 - **Image Uploads**: Upload images securely directly to Cloudinary.
 - **Responsive UI**: A modern React-based frontend built with Vite.
 
