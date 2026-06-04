@@ -1,11 +1,21 @@
 # Dobby Ads Drive
 
+## Live Demo
+- **Frontend URL**: https://dobby-ads-drive-pearl.vercel.app/
+- **Backend API URL**: https://dobby-ads-drive.onrender.com
+- **Demo credentials**:
+  - Email: test_123@test.com
+  - Password: password123
+
 Dobby Ads Drive is a full-stack MERN application that provides a drive-like experience. Users can create accounts, manage folders, and upload images to their drive. The application uses Cloudinary for secure and reliable image storage.
 
 ## Features
 
 - **User Authentication**: Secure signup and login using JSON Web Tokens (JWT).
 - **Drive Management**: Create and organize folders.
+- **Nested Folders**: Create folders inside folders, similar to Google Drive
+- **Folder Size**: Each folder displays total size including all nested content
+- **User Isolation**: Users can only see their own folders and images
 - **Image Uploads**: Upload images securely directly to Cloudinary.
 - **Responsive UI**: A modern React-based frontend built with Vite.
 
@@ -106,5 +116,80 @@ To run both the server and the client in development mode, follow these steps:
 - **Auth Routes (`/api/auth`)**: Handles user registration and login.
 - **Folder Routes (`/api/folders`)**: Create and list drive folders.
 - **Image Routes (`/api/images`)**: Handle image uploads and retrieval.
+
+---
+
+## MCP Server (Bonus)
+
+This project includes an MCP (Model Context Protocol) server that exposes 
+backend actions as tools for AI assistants like Claude Desktop.
+
+### MCP Tools Available
+
+| Tool | Description |
+|------|-------------|
+| `create_folder` | Creates a new folder, supports nested folders via parentId |
+| `list_folders` | Lists all folders for the authenticated user |
+| `upload_image` | Uploads an image to a specific folder |
+
+### Setup MCP with Claude Desktop
+
+1. Install [Claude Desktop](https://claude.ai/download)
+
+2. Add the following to your Claude Desktop config file:
+   - **Windows**: `%APPDATA%\\Claude\\claude_desktop_config.json`
+   - **Mac**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "dobby-ads": {
+      "command": "node",
+      "args": ["/absolute/path/to/server/mcp/index.js"],
+      "env": {
+        "API_BASE_URL": "https://dobby-ads-drive.onrender.com"
+      }
+    }
+  }
+}
+```
+
+3. Restart Claude Desktop — a hammer icon 🔨 will appear in the chat input
+
+4. Get your JWT token from the app (DevTools → Application → LocalStorage)
+
+5. Start using natural language commands:
+   - "My token is eyJ... List all my folders"
+   - "Create a folder called Campaigns"
+   - "Create a nested folder called Summer inside Campaigns"
+
+### MCP Server Location
+The MCP server code is located at `server/mcp/index.js`
+
+---
+
+## Project Structure
+
+```text
+dobby-ads-drive/
+├── client/                 # React Frontend (Vite)
+│   ├── src/
+│   │   ├── api/            # Axios API config
+│   │   ├── components/     # UI components (Grid, Modals, Breadcrumb)
+│   │   ├── context/        # React Context (Auth)
+│   │   ├── pages/          # Page components (Login, Signup, Drive)
+│   │   ├── App.jsx         # Application routing
+│   │   └── index.css       # Global styles
+│   └── package.json
+├── server/                 # Node.js Backend
+│   ├── models/             # Mongoose Models (User, Folder, Image)
+│   ├── routes/             # API Routes
+│   ├── middleware/         # Custom Middleware (Auth)
+│   ├── mcp/                # MCP Server Implementation
+│   ├── server.js           # Express App entry point
+│   ├── .env.example        # Env template
+│   └── package.json
+└── README.md
+```
 
 Enjoy using Dobby Ads Drive!

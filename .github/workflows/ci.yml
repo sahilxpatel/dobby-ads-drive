@@ -1,0 +1,40 @@
+name: Dobby Ads Drive CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install Server Dependencies
+      working-directory: ./server
+      run: npm install
+
+    - name: Install Client Dependencies
+      working-directory: ./client
+      run: npm install
+
+    - name: Lint Client
+      working-directory: ./client
+      run: npm run lint
+
+    - name: Build Client
+      working-directory: ./client
+      run: npm run build
