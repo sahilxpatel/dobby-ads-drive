@@ -3,6 +3,7 @@
 ## Live Demo
 - **Frontend URL**: https://dobby-ads-drive-pearl.vercel.app/
 - **Backend API URL**: https://dobby-ads-drive.onrender.com
+- **Demo Video**: [Watch Demo](https://drive.google.com/file/d/184qS3xj-lehdK_Hj3uvxXyMTVsdLoZNy/view?usp=sharing)
 - **Demo credentials**:
   - Email: test_123@test.com
   - Password: password123
